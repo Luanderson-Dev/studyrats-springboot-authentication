@@ -84,7 +84,13 @@ git clone https://github.com/seu-usuario/studyrats-api.git
 cd studyrats-api
 ```
 
-### 3 - Rodar a aplicação
+### 3 - Rodar o banco de dados
+```bash
+cd docker
+docker compose up -d
+```
+
+### 4 - Rodar a aplicação
 
 ```
 mvn spring-boot:run
