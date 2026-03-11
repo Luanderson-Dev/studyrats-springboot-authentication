@@ -48,7 +48,7 @@ public class AuthController {
     public void logout(@RequestBody RefreshRequest request){
 
         var refreshToken =
-                refreshTokenService.validate(request.getRefreshToken());
+                refreshTokenService.validate(request.refreshToken());
         refreshTokenService.revokeAllUserTokens(
                 refreshToken.getUserId()
         );

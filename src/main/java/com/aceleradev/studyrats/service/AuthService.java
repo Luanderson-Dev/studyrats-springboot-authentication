@@ -31,16 +31,16 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request){
-        if(userRepository.existsByEmail(request.getEmail())){
+        if(userRepository.existsByEmail(request.email())){
             throw new RuntimeException("email already registered");
         }
 
         String passwordHash =
-                passwordService.hashPassword(request.getPassword());
+                passwordService.hashPassword(request.password());
 
         User user = User.builder()
-                .name(request.getName())
-                .email(request.getEmail())
+                .name(request.name())
+                .email(request.email())
                 .passwordHash(passwordHash)
                 .build();
 
@@ -52,20 +52,16 @@ public class AuthService {
         RefreshToken refreshToken =
                 refreshTokenService.create(user.getId());
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
-                .tokenType("Bearer")
-                .build();
+        return new AuthResponse(accessToken, refreshToken.getToken(), "Bearer");
     }
 
     public AuthResponse login(LoginRequest request){
         User user = userRepository
-                .findByEmail(request.getEmail())
+                .findByEmail(request.email())
                 .orElseThrow();
 
         if(!passwordService.verify(
-                request.getPassword(),
+                request.password(),
                 user.getPasswordHash()
         )){
             throw new RuntimeException("invalid credentials");
@@ -77,15 +73,12 @@ public class AuthService {
         RefreshToken refreshToken =
                 refreshTokenService.create(user.getId());
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
-                .build();
+        return new AuthResponse(accessToken, refreshToken.getToken(), "Bearer");
     }
 
     public AuthResponse refresh(RefreshRequest request){
         RefreshToken refreshToken =
-                refreshTokenService.validate(request.getRefreshToken());
+                refreshTokenService.validate(request.refreshToken());
 
         String newAccessToken =
                 jwtService.generateToken(refreshToken.getUserId());
@@ -93,10 +86,6 @@ public class AuthService {
         RefreshToken newRefreshToken =
                 refreshTokenService.rotate(refreshToken);
 
-        return AuthResponse.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken.getToken())
-                .tokenType("Bearer")
-                .build();
+        return new AuthResponse(newAccessToken, refreshToken.getToken(), "Bearer");
     }
 }

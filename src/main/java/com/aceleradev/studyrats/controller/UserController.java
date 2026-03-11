@@ -1,6 +1,7 @@
 package com.aceleradev.studyrats.controller;
 
 import com.aceleradev.studyrats.domain.entity.User;
+import com.aceleradev.studyrats.dto.response.UserResponse;
 import com.aceleradev.studyrats.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +19,18 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public User me(Authentication authentication){
+    public UserResponse me(Authentication authentication){
+
         String userId = authentication.getName();
 
-        return userRepository
+        User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail()
+        );
     }
 }
